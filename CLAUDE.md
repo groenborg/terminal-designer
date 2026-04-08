@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - `npm run dev` — start Vite dev server
 - `npm run build` — production build to `dist/`
-- `npm run lint` — ESLint (flat config, React hooks + React Refresh plugins)
+- `npm run lint` — Biome linter + import organizer
 - `npm run preview` — preview production build
 
 ## Architecture
