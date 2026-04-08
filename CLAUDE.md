@@ -4,10 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-- `npm run dev` — start Vite dev server
-- `npm run build` — production build to `dist/`
-- `npm run lint` — Biome linter + import organizer
-- `npm run preview` — preview production build
+- `bun dev` — start Vite dev server
+- `bun run build` — production build to `dist/`
+- `bun run lint` — Biome linter + import organizer
+- `bun run preview` — preview production build
 
 ## Architecture
 

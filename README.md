@@ -5,8 +5,8 @@ A visual color editor for the [Ghostty](https://ghostty.org) terminal Moon theme
 ## Getting started
 
 ```bash
-npm install
-npm run dev
+bun install
+bun dev
 ```
 
 ## Export
@@ -22,7 +22,7 @@ Font selection goes in your main Ghostty config, not the theme file.
 ## Build
 
 ```bash
-npm run build
+bun run build
 ```
 
 Output lands in `dist/`.
