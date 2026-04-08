@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 const DEFAULTS = {
   dark: {
@@ -96,6 +96,87 @@ const FONTS = [
   { label: "Consolas", value: "Consolas" },
 ]
 
+function TopNav({ onToggleSidebar }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 24,
+        padding: "10px 20px",
+        background: "var(--chrome-bg-secondary)",
+        borderBottom: "1px solid var(--chrome-border)",
+        fontFamily: "var(--font-ui)",
+        fontSize: 14,
+        flexShrink: 0,
+        flexWrap: "wrap",
+      }}
+    >
+      <span
+        style={{
+          fontWeight: 700,
+          color: "var(--chrome-text-primary)",
+        }}
+      >
+        Moon Editor
+      </span>
+      <span style={{ color: "var(--chrome-text-tertiary)" }}>
+        Type{" "}
+        <span style={{ color: "var(--chrome-text-primary)", fontWeight: 600 }}>
+          help
+        </span>{" "}
+        for options
+      </span>
+      <NavItem onClick={onToggleSidebar} label="E" text="show editor" />
+      <NavItem label="D" text="Docs" />
+      <NavItem label="?" text="Help" />
+    </div>
+  )
+}
+
+function NavItem({ onClick, label, text }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        background: "none",
+        border: "none",
+        padding: 0,
+        cursor: "pointer",
+        fontFamily: "var(--font-ui)",
+        fontSize: 14,
+        color: "var(--chrome-text-secondary)",
+        transition: "color 0.15s",
+      }}
+      onMouseEnter={(e) =>
+        (e.currentTarget.style.color = "var(--chrome-text-primary)")
+      }
+      onMouseLeave={(e) =>
+        (e.currentTarget.style.color = "var(--chrome-text-secondary)")
+      }
+    >
+      <span style={{ fontWeight: 700 }}>[{label}]</span> {text}
+    </button>
+  )
+}
+
+function SecondaryBar({ variant }) {
+  return (
+    <div
+      style={{
+        padding: "8px 20px",
+        background: "var(--chrome-bg-deep)",
+        fontFamily: "var(--font-ui)",
+        fontSize: 13,
+        color: "var(--chrome-text-tertiary)",
+        flexShrink: 0,
+      }}
+    >
+      ~/moon-editor/{variant} 0.092s
+    </div>
+  )
+}
+
 function ColorSwatch({ color, onChange, label, small }) {
   const ref = useRef(null)
   return (
@@ -174,14 +255,13 @@ function Preview({ theme, font }) {
     <div
       style={{
         background: bg,
-        borderRadius: 10,
-        padding: "20px 24px",
+        padding: "24px 32px",
         fontFamily: `"${font}", var(--font-mono)`,
-        fontSize: 13,
+        fontSize: 14,
         lineHeight: 1.9,
-        border: "1px solid rgba(128,128,140,0.15)",
-        overflow: "auto",
         whiteSpace: "pre-wrap",
+        flex: 1,
+        overflow: "auto",
       }}
     >
       <span style={s(8)}>{"# Moon theme preview"}</span>
@@ -367,11 +447,423 @@ function ExportPanel({ theme, variant, font }) {
   )
 }
 
+function TerminalInput() {
+  return (
+    <div
+      style={{
+        padding: "12px 20px 16px",
+        background: "var(--chrome-bg-primary)",
+        borderTop: "1px solid var(--chrome-border)",
+        fontFamily: "var(--font-ui)",
+        flexShrink: 0,
+      }}
+    >
+      <span
+        style={{
+          display: "inline-block",
+          color: "var(--chrome-text-secondary)",
+          padding: "3px 10px",
+          borderRadius: 4,
+          fontSize: 13,
+          fontWeight: 500,
+          marginBottom: 10,
+          border: "1px solid var(--chrome-border)",
+        }}
+      >
+        ~/moon-editor
+      </span>
+      <div>
+        <input
+          type="text"
+          placeholder="Type '/' or 'help' to see options"
+          style={{
+            width: "100%",
+            background: "transparent",
+            border: "none",
+            outline: "none",
+            color: "var(--chrome-text-tertiary)",
+            fontFamily: "var(--font-ui)",
+            fontSize: 14,
+            caretColor: "var(--chrome-text-primary)",
+          }}
+        />
+      </div>
+    </div>
+  )
+}
+
+function FooterBar({ variant, font, theme }) {
+  const dot = (
+    <span style={{ color: "var(--chrome-text-tertiary)", opacity: 0.5 }}>
+      {" · "}
+    </span>
+  )
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        padding: "5px 20px",
+        background: "var(--chrome-bg-secondary)",
+        borderTop: "1px solid var(--chrome-border)",
+        fontFamily: "var(--font-ui)",
+        fontSize: 12,
+        color: "var(--chrome-text-tertiary)",
+        flexShrink: 0,
+        gap: 4,
+      }}
+    >
+      <span
+        style={{
+          display: "inline-flex",
+          gap: 3,
+          alignItems: "center",
+          marginRight: 4,
+        }}
+      >
+        <span
+          style={{
+            display: "inline-block",
+            width: 7,
+            height: 7,
+            borderRadius: "50%",
+            background: "var(--chrome-text-green)",
+          }}
+        />
+        Theme Ready
+      </span>
+      {dot}
+      <span>{variant} variant</span>
+      {dot}
+      <span>16 palette colors</span>
+      {dot}
+      <span>font: {font || "system default"}</span>
+      {dot}
+      <span>
+        {theme.background} / {theme.foreground}
+      </span>
+    </div>
+  )
+}
+
+function EditorSidebar({
+  open,
+  onClose,
+  variant,
+  setVariant,
+  view,
+  setView,
+  font,
+  setFont,
+  theme,
+  setProp,
+  setPalette,
+  resetTheme,
+}) {
+  const tabStyle = (active) => ({
+    padding: "7px 18px",
+    fontSize: 13,
+    fontFamily: "var(--font-ui)",
+    fontWeight: 500,
+    border: "none",
+    borderRadius: 7,
+    cursor: "pointer",
+    background: active ? "var(--chrome-bg-tertiary)" : "transparent",
+    color: active
+      ? "var(--chrome-text-primary)"
+      : "var(--chrome-text-tertiary)",
+    boxShadow: active ? "0 1px 3px rgba(0,0,0,0.15)" : "none",
+    transition: "all 0.2s",
+  })
+
+  return (
+    <>
+      <div
+        className={`sidebar-overlay${open ? " open" : ""}`}
+        onClick={onClose}
+      />
+      <div className={`sidebar${open ? " open" : ""}`}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 24,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 15,
+              fontWeight: 600,
+              color: "var(--chrome-text-primary)",
+              fontFamily: "var(--font-ui)",
+            }}
+          >
+            Theme Editor
+          </span>
+          <button className="kbd-badge" onClick={onClose}>
+            ESC
+          </button>
+        </div>
+
+        {/* Variant toggle */}
+        <div style={{ marginBottom: 20 }}>
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 500,
+              color: "var(--chrome-text-tertiary)",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              display: "block",
+              marginBottom: 8,
+            }}
+          >
+            Variant
+          </span>
+          <div
+            style={{
+              display: "inline-flex",
+              gap: 3,
+              padding: 3,
+              background: "var(--chrome-bg-primary)",
+              borderRadius: 9,
+            }}
+          >
+            <button
+              style={tabStyle(variant === "dark")}
+              onClick={() => setVariant("dark")}
+            >
+              Dark
+            </button>
+            <button
+              style={tabStyle(variant === "light")}
+              onClick={() => setVariant("light")}
+            >
+              Light
+            </button>
+          </div>
+        </div>
+
+        {/* View toggle */}
+        <div style={{ marginBottom: 20 }}>
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 500,
+              color: "var(--chrome-text-tertiary)",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              display: "block",
+              marginBottom: 8,
+            }}
+          >
+            View
+          </span>
+          <div
+            style={{
+              display: "inline-flex",
+              gap: 3,
+              padding: 3,
+              background: "var(--chrome-bg-primary)",
+              borderRadius: 9,
+            }}
+          >
+            <button
+              style={tabStyle(view === "preview")}
+              onClick={() => setView("preview")}
+            >
+              Preview
+            </button>
+            <button
+              style={tabStyle(view === "export")}
+              onClick={() => setView("export")}
+            >
+              Export
+            </button>
+          </div>
+        </div>
+
+        {/* Font selector */}
+        <div style={{ marginBottom: 20 }}>
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 500,
+              color: "var(--chrome-text-tertiary)",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              display: "block",
+              marginBottom: 8,
+            }}
+          >
+            Font
+          </span>
+          <select
+            value={font}
+            onChange={(e) => setFont(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "8px 10px",
+              fontSize: 13,
+              fontFamily: font
+                ? `"${font}", var(--font-mono)`
+                : "var(--font-mono)",
+              background: "var(--chrome-bg-primary)",
+              color: "var(--chrome-text-primary)",
+              border: "1px solid var(--chrome-border)",
+              borderRadius: 7,
+              cursor: "pointer",
+              appearance: "auto",
+              marginBottom: 6,
+            }}
+          >
+            {FONTS.map((f) => (
+              <option key={f.value} value={f.value}>
+                {f.label}
+              </option>
+            ))}
+          </select>
+          <input
+            type="text"
+            placeholder="or type a font name"
+            value={FONTS.some((f) => f.value === font) ? "" : font}
+            onChange={(e) => setFont(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "8px 10px",
+              fontSize: 12,
+              fontFamily: "var(--font-mono)",
+              background: "var(--chrome-bg-primary)",
+              color: "var(--chrome-text-primary)",
+              border: "1px solid var(--chrome-border)",
+              borderRadius: 7,
+            }}
+          />
+        </div>
+
+        {/* Base colors */}
+        <div style={{ marginBottom: 20 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 8,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 500,
+                color: "var(--chrome-text-tertiary)",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+              }}
+            >
+              Base Colors
+            </span>
+            <button
+              onClick={resetTheme}
+              style={{
+                background: "none",
+                border: "none",
+                color: "var(--chrome-text-tertiary)",
+                fontSize: 11,
+                cursor: "pointer",
+                fontFamily: "var(--font-ui)",
+                padding: "2px 6px",
+                borderRadius: 4,
+                transition: "color 0.15s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = "var(--chrome-text-primary)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = "var(--chrome-text-tertiary)")
+              }
+            >
+              Reset defaults
+            </button>
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 2,
+            }}
+          >
+            <ColorSwatch
+              label="Background"
+              color={theme.background}
+              onChange={(v) => setProp("background", v)}
+              small
+            />
+            <ColorSwatch
+              label="Foreground"
+              color={theme.foreground}
+              onChange={(v) => setProp("foreground", v)}
+              small
+            />
+            <ColorSwatch
+              label="Cursor"
+              color={theme.cursorColor}
+              onChange={(v) => setProp("cursorColor", v)}
+              small
+            />
+            <ColorSwatch
+              label="Selection bg"
+              color={theme.selectionBg}
+              onChange={(v) => setProp("selectionBg", v)}
+              small
+            />
+          </div>
+        </div>
+
+        {/* Palette */}
+        <div>
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 500,
+              color: "var(--chrome-text-tertiary)",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              display: "block",
+              marginBottom: 8,
+            }}
+          >
+            Palette
+          </span>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 2,
+            }}
+          >
+            {theme.palette.map((c, i) => (
+              <ColorSwatch
+                key={`${variant}-${i}`}
+                label={NAMES[i]}
+                color={c}
+                onChange={(v) => setPalette(i, v)}
+                small
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
 export default function MoonEditor() {
   const [variant, setVariant] = useState("dark")
   const [themes, setThemes] = useState(JSON.parse(JSON.stringify(DEFAULTS)))
   const [view, setView] = useState("preview")
   const [font, setFont] = useState("")
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const theme = themes[variant]
 
@@ -405,254 +897,69 @@ export default function MoonEditor() {
     })
   }
 
-  const tabStyle = (active) => ({
-    padding: "7px 18px",
-    fontSize: 13,
-    fontFamily: "var(--font-sans)",
-    fontWeight: 500,
-    border: "none",
-    borderRadius: 7,
-    cursor: "pointer",
-    background: active ? "var(--color-background-primary)" : "transparent",
-    color: active ? "var(--color-text-primary)" : "var(--color-text-tertiary)",
-    boxShadow: active ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
-    transition: "all 0.2s",
-  })
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const tag = e.target.tagName
+      if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return
+      if (e.key === "e" || e.key === "E") {
+        e.preventDefault()
+        setSidebarOpen((prev) => !prev)
+      }
+      if (e.key === "Escape") {
+        setSidebarOpen(false)
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [])
 
   return (
-    <div style={{ padding: "0.5rem 0" }}>
-      <style>{`
-        @keyframes blink { 0%,100% { opacity:1 } 50% { opacity:0 } }
-        * { box-sizing: border-box; }
-      `}</style>
+    <>
+      <TopNav onToggleSidebar={() => setSidebarOpen((v) => !v)} />
+      <SecondaryBar variant={variant} />
 
       <div
         style={{
+          flex: 1,
+          overflow: "hidden",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 20,
-          flexWrap: "wrap",
-          gap: 10,
+          flexDirection: "column",
+          minHeight: 0,
         }}
       >
-        <div
-          style={{
-            display: "inline-flex",
-            gap: 3,
-            padding: 3,
-            background: "var(--color-background-secondary)",
-            borderRadius: 9,
-          }}
-        >
-          <button
-            style={tabStyle(variant === "dark")}
-            onClick={() => setVariant("dark")}
-          >
-            Dark
-          </button>
-          <button
-            style={tabStyle(variant === "light")}
-            onClick={() => setVariant("light")}
-          >
-            Light
-          </button>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            gap: 3,
-            padding: 3,
-            background: "var(--color-background-secondary)",
-            borderRadius: 9,
-          }}
-        >
-          <button
-            style={tabStyle(view === "preview")}
-            onClick={() => setView("preview")}
-          >
-            Preview
-          </button>
-          <button
-            style={tabStyle(view === "export")}
-            onClick={() => setView("export")}
-          >
-            Export
-          </button>
-        </div>
-      </div>
-
-      {view === "preview" ? (
-        <Preview theme={theme} font={font} />
-      ) : (
-        <ExportPanel theme={theme} variant={variant} font={font} />
-      )}
-
-      <div style={{ marginTop: 24 }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 12,
-          }}
-        >
-          <span
-            style={{
-              fontSize: 13,
-              fontWeight: 500,
-              color: "var(--color-text-secondary)",
-            }}
-          >
-            Base
-          </span>
-          <button
-            onClick={resetTheme}
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--color-text-tertiary)",
-              fontSize: 12,
-              cursor: "pointer",
-              fontFamily: "var(--font-sans)",
-              padding: "4px 8px",
-              borderRadius: 6,
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.color = "var(--color-text-primary)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.color = "var(--color-text-tertiary)")
-            }
-          >
-            Reset to defaults
-          </button>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            padding: "6px 8px",
-            marginBottom: 8,
-          }}
-        >
-          <label
-            style={{
-              fontSize: 12,
-              color: "var(--color-text-secondary)",
-              flexShrink: 0,
-            }}
-          >
-            Font
-          </label>
-          <select
-            value={font}
-            onChange={(e) => setFont(e.target.value)}
+        {view === "preview" ? (
+          <Preview theme={theme} font={font} />
+        ) : (
+          <div
             style={{
               flex: 1,
-              maxWidth: 260,
-              padding: "6px 10px",
-              fontSize: 13,
-              fontFamily: font
-                ? `"${font}", var(--font-mono)`
-                : "var(--font-mono)",
-              background: "var(--color-background-primary)",
-              color: "var(--color-text-primary)",
-              border: "0.5px solid var(--color-border-secondary)",
-              borderRadius: 7,
-              cursor: "pointer",
-              appearance: "auto",
+              overflow: "auto",
+              padding: "24px 32px",
+              background: theme.background,
             }}
           >
-            {FONTS.map((f) => (
-              <option key={f.value} value={f.value}>
-                {f.label}
-              </option>
-            ))}
-          </select>
-          <input
-            type="text"
-            placeholder="or type a font name"
-            value={FONTS.some((f) => f.value === font) ? "" : font}
-            onChange={(e) => setFont(e.target.value)}
-            style={{
-              flex: 1,
-              maxWidth: 200,
-              padding: "6px 10px",
-              fontSize: 12,
-              fontFamily: "var(--font-mono)",
-              background: "var(--color-background-primary)",
-              color: "var(--color-text-primary)",
-              border: "0.5px solid var(--color-border-tertiary)",
-              borderRadius: 7,
-            }}
-          />
-        </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))",
-            gap: 2,
-          }}
-        >
-          <ColorSwatch
-            label="Background"
-            color={theme.background}
-            onChange={(v) => setProp("background", v)}
-            small
-          />
-          <ColorSwatch
-            label="Foreground"
-            color={theme.foreground}
-            onChange={(v) => setProp("foreground", v)}
-            small
-          />
-          <ColorSwatch
-            label="Cursor"
-            color={theme.cursorColor}
-            onChange={(v) => setProp("cursorColor", v)}
-            small
-          />
-          <ColorSwatch
-            label="Selection bg"
-            color={theme.selectionBg}
-            onChange={(v) => setProp("selectionBg", v)}
-            small
-          />
-        </div>
+            <ExportPanel theme={theme} variant={variant} font={font} />
+          </div>
+        )}
       </div>
 
-      <div style={{ marginTop: 24 }}>
-        <span
-          style={{
-            fontSize: 13,
-            fontWeight: 500,
-            color: "var(--color-text-secondary)",
-            display: "block",
-            marginBottom: 12,
-          }}
-        >
-          Palette
-        </span>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))",
-            gap: 2,
-          }}
-        >
-          {theme.palette.map((c, i) => (
-            <ColorSwatch
-              key={`${variant}-${i}`}
-              label={NAMES[i]}
-              color={c}
-              onChange={(v) => setPalette(i, v)}
-              small
-            />
-          ))}
-        </div>
-      </div>
-    </div>
+      <TerminalInput />
+      <FooterBar variant={variant} font={font} theme={theme} />
+
+      <EditorSidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        variant={variant}
+        setVariant={setVariant}
+        view={view}
+        setView={setView}
+        font={font}
+        setFont={setFont}
+        theme={theme}
+        setProp={setProp}
+        setPalette={setPalette}
+        resetTheme={resetTheme}
+      />
+    </>
   )
 }
