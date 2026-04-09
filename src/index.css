@@ -2,22 +2,23 @@
 
 @theme {
   /* Chrome background colors */
-  --color-chrome-bg-deep: #14102b;
-  --color-chrome-bg-primary: #19143a;
-  --color-chrome-bg-secondary: #1e1842;
-  --color-chrome-bg-tertiary: #2a2254;
-  --color-chrome-bg-input: #1b1540;
+  --color-chrome-bg-deep: #070224;
+  --color-chrome-bg-primary: #0d0830;
+  --color-chrome-bg-secondary: #110b3a;
+  --color-chrome-bg-tertiary: #1a1348;
+  --color-chrome-bg-input: #0d0830;
+  --color-chrome-bg-button: rgba(177, 165, 255, 0.1);
 
   /* Chrome text colors */
-  --color-chrome-text-primary: #cbc4dd;
-  --color-chrome-text-secondary: #8e86a6;
-  --color-chrome-text-tertiary: #5e5678;
-  --color-chrome-text-accent: #cbc4dd;
+  --color-chrome-text-primary: #e3dfff;
+  --color-chrome-text-secondary: #b1a5ff;
+  --color-chrome-text-tertiary: #7b72a8;
+  --color-chrome-text-accent: #b1a5ff;
   --color-chrome-text-green: #6ee7b7;
 
   /* Chrome border colors */
-  --color-chrome-border: rgba(140, 130, 170, 0.12);
-  --color-chrome-border-focus: rgba(140, 130, 170, 0.25);
+  --color-chrome-border: rgba(177, 165, 255, 0.2);
+  --color-chrome-border-focus: rgba(177, 165, 255, 0.35);
 
   /* Semantic colors */
   --color-bg-success: #1a2e1f;
@@ -96,22 +97,21 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 12px;
+  padding: 6px 8px;
   border-radius: 4px;
   font-family: var(--font-ui);
   font-size: 13px;
   cursor: pointer;
-  border: 1px solid var(--color-chrome-border);
-  background: transparent;
+  border: none;
+  background: var(--color-chrome-bg-button);
   color: var(--color-chrome-text-secondary);
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background 0.15s, color 0.15s;
   white-space: nowrap;
 }
 
 .kbd-badge:hover {
   background: var(--color-chrome-bg-tertiary);
   color: var(--color-chrome-text-primary);
-  border-color: var(--color-chrome-border-focus);
 }
 
 /* Animations */

@@ -50,6 +50,25 @@ export default function MoonEditor() {
   }
 
   useEffect(() => {
+    const s = document.documentElement.style
+    const bg = theme.background
+    const fg = theme.foreground
+    s.setProperty("--color-chrome-bg-deep", bg)
+    s.setProperty("--color-chrome-bg-primary", `color-mix(in srgb, ${bg} 95%, ${fg})`)
+    s.setProperty("--color-chrome-bg-secondary", `color-mix(in srgb, ${bg} 88%, ${fg})`)
+    s.setProperty("--color-chrome-bg-tertiary", `color-mix(in srgb, ${bg} 80%, ${fg})`)
+    s.setProperty("--color-chrome-bg-input", bg)
+    s.setProperty("--color-chrome-bg-button", `color-mix(in srgb, ${fg} 10%, transparent)`)
+    s.setProperty("--color-chrome-text-primary", fg)
+    s.setProperty("--color-chrome-text-secondary", `color-mix(in srgb, ${fg} 70%, ${bg})`)
+    s.setProperty("--color-chrome-text-tertiary", `color-mix(in srgb, ${fg} 45%, ${bg})`)
+    s.setProperty("--color-chrome-text-accent", theme.cursorColor)
+    s.setProperty("--color-chrome-text-green", theme.palette[2])
+    s.setProperty("--color-chrome-border", `color-mix(in srgb, ${fg} 15%, transparent)`)
+    s.setProperty("--color-chrome-border-focus", `color-mix(in srgb, ${fg} 25%, transparent)`)
+  }, [theme])
+
+  useEffect(() => {
     const handleKeyDown = (e) => {
       const tag = e.target.tagName
       if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return
@@ -68,16 +87,16 @@ export default function MoonEditor() {
   return (
     <>
       <TopNav onToggleSidebar={() => setSidebarOpen((v) => !v)} />
-      <SecondaryBar variant={variant} />
 
       <div className="flex-1 overflow-hidden flex flex-col min-h-0">
         {view === "preview" ? (
-          <Preview theme={theme} font={font} />
+          <div className="flex-1 overflow-auto">
+            <SecondaryBar variant={variant} />
+            <Preview theme={theme} font={font} />
+          </div>
         ) : (
-          <div
-            className="flex-1 overflow-auto py-6 px-8"
-            style={{ background: theme.background }}
-          >
+          <div className="flex-1 overflow-auto py-6 px-8">
+            <SecondaryBar variant={variant} />
             <ExportPanel theme={theme} variant={variant} font={font} />
           </div>
         )}
